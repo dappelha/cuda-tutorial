@@ -28,7 +28,7 @@ GENCODE_FLAGS += -gencode arch=compute_$(SMS),code=compute_$(SMS)
 # Target rules
 all: build
 
-build: matVec
+build: $(EXE)
 
 check.deps:
 ifeq ($(SAMPLE_ENABLED),0)
@@ -40,12 +40,12 @@ endif
 matVec.o:matVec.cu
 	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
-matVec: matVec.o
+$(EXE): matVec.o
 	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
 run: build
-	$(EXEC) ./matVec
+	$(EXEC) $(EXE)
 
 clean:
-	rm -f $(EXE) $(ALL_OBJ)
+	rm -f $(EXE) $(ALL_OBJ) *.o
 
