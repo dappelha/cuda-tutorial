@@ -15,15 +15,15 @@ HOST_COMPILER ?= g++
 NVCC          := $(CUDA_PATH)/bin/nvcc -ccbin $(HOST_COMPILER)
 
 # internal flags
-NVCCFLAGS   := -m${TARGET_SIZE}
-CCFLAGS     :=
-LDFLAGS     :=
+#NVCCFLAGS   := -m${TARGET_SIZE} 
+CCFLAGS     := --resource-usage -Xptxas -v --maxrregcount 64
+LDFLAGS     := --resource-usage -Xnvlink -v
 
 
 # Gencode arguments
 SMS := 70
 
-GENCODE_FLAGS += -gencode arch=compute_$(SMS),code=compute_$(SMS)
+GENCODE_FLAGS += -gencode arch=compute_$(SMS),code=sm_$(SMS)
 
 # Target rules
 all: build
@@ -38,10 +38,10 @@ else
 endif
 
 matVec.o:matVec.cu
-	$(EXEC) $(NVCC) $(INCLUDES) $(ALL_CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
+	$(EXEC) $(NVCC) $(INCLUDES) $(CCFLAGS) $(GENCODE_FLAGS) -o $@ -c $<
 
 $(EXE): matVec.o
-	$(EXEC) $(NVCC) $(ALL_LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
+	$(EXEC) $(NVCC) $(LDFLAGS) $(GENCODE_FLAGS) -o $@ $+ $(LIBRARIES)
 
 run: build
 	$(EXEC) $(EXE)
